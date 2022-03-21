@@ -2,8 +2,8 @@ extends layout
 
 block content
 
-  h1 Author: #{author.name}
-  p #{author.lifespan_formatted}
+  h1 Author:#{author.name}
+  p  #{author.lifespan_formatted}
 
   div(style='margin-left:20px;margin-top:20px')
 
@@ -17,3 +17,7 @@ block content
 
       else
         p This author has no books.
+
+  hr
+  p
+    a(href=author.url+'/delete') Delete author

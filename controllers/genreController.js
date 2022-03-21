@@ -3,6 +3,7 @@ const Book = require('../models/book');
 const async = require('async');
 const { body, validationResult } = require('express-validator');
 const mongoose = require('mongoose');
+const bookinstance = require('../models/bookinstance');
 
 // Display list of all Genre.
 exports.genre_list = function (req, res) {
@@ -45,7 +46,7 @@ exports.genre_create_get = function (req, res) {
 };
 
 // Handle Genre create on POST.
-exports.genre_create_post = [ 
+exports.genre_create_post = [
     //Validate and sanitize the name field
     body('name', 'Genre name required').trim().isLength({ min: 1 }).escape(),
 
@@ -68,12 +69,12 @@ exports.genre_create_post = [
             Genre.findOne({ 'name': req.body.name })
                 .exec(function (err, found_genre) {
                     if (err) { return next(err) }
-                    if(found_genre) {
+                    if (found_genre) {
                         //Genre exists, redirect to its detail page.
                         res.redirect(found_genre.url);
                     }
                     else {
-                        genre.save(function(err){
+                        genre.save(function (err) {
                             if (err) { return next(err) }
                             //Genre saved. Redirect to newly created detail page.
                             res.redirect(genre.url);
@@ -85,13 +86,43 @@ exports.genre_create_post = [
 ];
 
 // Display Genre delete form on GET.
-exports.genre_delete_get = function (req, res) {
-    res.send('NOT IMPLEMENTED: Genre delete GET');
+exports.genre_delete_get = function (req, res, next) {
+    async.parallel({
+        genre: function (callback) { Genre.findById(req.params.id).exec(callback) },
+        genre_books: function (callback) { Book.find({ 'genre': req.params.id }).exec(callback) }
+    },
+        function (err, results) {
+            if (err) { return next(err) }
+            if (results.genre == null) {//Genre does not exist. Redirect to genre list.
+                res.redirect('/catalog/genres');
+            }
+            //Successful, so render:
+            res.render('genre_delete', { title: 'Delete Genre', genre: results.genre, genre_books: results.genre_books })
+        })
 };
 
 // Handle Genre delete on POST.
 exports.genre_delete_post = function (req, res) {
-    res.send('NOT IMPLEMENTED: Genre delete POST');
+    async.parallel({
+        genre: function (callback) { Genre.findById(req.params.id).exec(callback) },
+        genre_books: function (callback) { bookinstance.find({ 'genre': req.params.id }).exec(callback) }
+    },
+        function (err, results) {
+            if (err) { return next(err) }
+            //Success
+            if (results.genre_books.length > 0) {
+                //There are still some books for this genre. Render in the same way as for GET route.
+                res.render('genre_delete', { title: 'Delete Genre', genre: results.genre, genre_books: results.genre_books });
+                return;
+            }
+            //This genre has no books. This means it's safe to delete the genre. So we do that and redirect to the genre list.
+            Genre.findByIdAndRemove(req.params.id, function deleteGenre(err) {
+                if (err) { return next(err); }
+                //Success. Redirect to Genre list.
+                res.redirect('/catalog/genres')
+            })
+        }
+    )
 };
 
 // Display Genre update form on GET.

@@ -93,13 +93,25 @@ exports.bookinstance_create_post = [
 ];
 
 // Display BookInstance delete form on GET.
-exports.bookinstance_delete_get = function (req, res) {
-    res.send('NOT IMPLEMENTED: BookInstance delete GET');
+exports.bookinstance_delete_get = function (req, res, next) {
+    BookInstance.findById(req.params.id).populate('book').exec(function (err, bookinstance) {
+        if (err) { return next(err) }
+        //Success. Render this instance's details.
+        res.render('bookinstance_delete', { title: 'Delete Book Instance', instance: bookinstance })
+    })
 };
 
 // Handle BookInstance delete on POST.
-exports.bookinstance_delete_post = function (req, res) {
-    res.send('NOT IMPLEMENTED: BookInstance delete POST');
+exports.bookinstance_delete_post = function (req, res, next) {
+    BookInstance.findById(req.params.id).populate('book').exec(function (err, bookinstance) {
+        if (err) { return next(err) }
+        //Success. Book instances can be deleted directly, since they're not a parent of any other document type. We move on to deleting this instance.
+        BookInstance.findByIdAndRemove(req.params.id, function deleteCopy(err) {
+            if (err) { return next(err) }
+            //The copy has been deleted successfully. Redirect to instance list.
+            res.redirect('/catalog/book/'+bookinstance.book.id)
+        })
+    })
 };
 
 // Display BookInstance update form on GET.

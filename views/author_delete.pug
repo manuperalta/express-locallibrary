@@ -1,10 +1,10 @@
 extends layout 
 block content 
-    h1  #{title}:#{author.name}
-    p=author.lifespan
+    h1  #{title}: #{author.name}
+    p= author.lifespan_formatted
 
     if author_books.length
-        p [strong Delete the following books before attempting to delete this author.]
+        p #[strong Delete the following books before attempting to delete this author.]
 
         div(style='margin-left:20px;margin-top:20px')
             h4 Books 

@@ -31,15 +31,14 @@ AuthorSchema
 AuthorSchema.virtual('lifespan').get(function () {
   let lifetime_string = '';
   if (this.date_of_birth) {
-    lifetime_string = this.date_of_birth.getYear().toString();
+    lifetime_string = this.date_of_birth.toString();
   }
   lifetime_string += ' - ';
   if (this.date_of_death) {
-    lifetime_string += this.date_of_death.getYear()
+    lifetime_string += this.date_of_death.toString()
   }
   return lifetime_string;
 });
-
 // Virtual for author's URL
 AuthorSchema
   .virtual('url')
@@ -51,7 +50,7 @@ AuthorSchema
 
 AuthorSchema
   .virtual('lifespan_formatted')
-  .get(function(){
+  .get(function () {
     let lifetime_string = '';
     this.date_of_birth ? lifetime_string = DateTime.fromJSDate(this.date_of_birth).toLocaleString(DateTime.DATE_MED) : '';
     lifetime_string += ' - ';

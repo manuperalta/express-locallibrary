@@ -144,21 +144,54 @@ exports.book_create_post = [
         else { //Data from form is valid. Save book
             book.save(function (err) {
                 if (err) { return next(err) }
-                    //Successful; redirect to a new book record
-                    res.redirect(book.url);
+                //Successful; redirect to a new book record
+                res.redirect(book.url);
             });
         }
     }
 ];
 
 // Display book delete form on GET.
-exports.book_delete_get = function (req, res) {
-    res.send('NOT IMPLEMENTED: Book delete GET');
+exports.book_delete_get = function (req, res, next) {
+    async.parallel({
+        book: function (callback) { Book.findById(req.params.id).exec(callback) },
+        book_instances: function (callback) { BookInstance.find({ 'book': req.params.id }).populate('book').exec(callback) }
+    },
+        function (err, results) {
+            if (err) { return next(err) }
+            //Success
+            if (results.book == null) {
+                //There are no books of this id. Redirect to book list:
+                res.redirect('/catalog/books')
+            }
+            //Successful, so render all book instances pertinent to that book
+            res.render('book_delete', { title: 'Delete Book', book: results.book, book_instances: results.book_instances })
+        })
 };
 
 // Handle book delete on POST.
-exports.book_delete_post = function (req, res) {
-    res.send('NOT IMPLEMENTED: Book delete POST');
+exports.book_delete_post = function (req, res, next) {
+    async.parallel({
+        book: function (callback) { Book.findById(req.params.id).exec(callback) },
+        book_instances: function (callback) { BookInstance.find({ 'book': req.params.id }).populate('book').exec(callback) }
+    },
+        function (err, results) {
+            if (err) { return next(err) }
+            //Success.
+            if (results.book_instances > 0) {
+                //This book still has instances to delete. Redirect to a list of all book instances that should be deleted.
+                res.redirect('book_delete', { title: 'Delete Book', book: results.book, book_instances: results.book_instances })
+            }
+            else {
+                //This book has no copies in library. It is safe to delete it from database.
+                //We do that,
+                Book.findByIdAndRemove(req.params.id, function deleteBook(err) {
+                    if (err) { return next(err); }
+                    //Success. Redirect to book list.
+                    res.redirect('/catalog/books');
+                });
+            }
+        })
 };
 
 // Display book update form on GET.

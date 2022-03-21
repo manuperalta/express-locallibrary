@@ -79,7 +79,7 @@ exports.author_create_post = [
 ];
 
 //Display Author delete form on GET
-exports.author_delete_get = (req, res) => {
+exports.author_delete_get = (req, res, next) => {
     async.parallel({
         author: function (callback) {
             Author.findById(req.params.id).exec(callback)
@@ -109,7 +109,7 @@ exports.author_delete_post = function (req, res, next) {
     }, function (err, results) {
         if (err) { return next(err) }
         //Success
-        if (authors_books.length > 0) {
+        if (results.authors_books.length > 0) {
             //Author has books. Render in same way as for GET route
             res.render('author_delete', {
                 title: 'Delete Author',

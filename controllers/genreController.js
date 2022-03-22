@@ -105,7 +105,7 @@ exports.genre_delete_get = function (req, res, next) {
 exports.genre_delete_post = function (req, res) {
     async.parallel({
         genre: function (callback) { Genre.findById(req.params.id).exec(callback) },
-        genre_books: function (callback) { bookinstance.find({ 'genre': req.params.id }).exec(callback) }
+        genre_books: function (callback) { Book.find({ 'genre': req.params.id }).exec(callback) }
     },
         function (err, results) {
             if (err) { return next(err) }

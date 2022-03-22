@@ -3,7 +3,7 @@ extends layout
 block content
   h1 Title: #{book.title}
 
-  p #[strong Author:]
+  p #[strong Author: ]
     a(href=book.author.url) #{book.author.name}
   p #[strong Summary:] #{book.summary}
   p #[strong ISBN:] #{book.isbn}
@@ -14,8 +14,8 @@ block content
         |,
 
   div(style='margin-left:20px;margin-top:20px')
-    h4 Copies
-
+    h4 Copies 
+    a(href='/catalog/bookinstance/create/'+book.id) Create copy
     each val in book_instances
       hr
       if val.status=='Available'

@@ -91,7 +91,7 @@ router.get('/genres', genre_controller.genre_list);
 /// BOOKINSTANCE ROUTES ///
 
 // GET request for creating a BookInstance. NOTE This must come before route that displays BookInstance (uses id).
-router.get('/bookinstance/create', book_instance_controller.bookinstance_create_get);
+router.get('/bookinstance/create/:bookid?', book_instance_controller.bookinstance_create_get);
 
 // POST request for creating BookInstance.
 router.post('/bookinstance/create', book_instance_controller.bookinstance_create_post);

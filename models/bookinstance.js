@@ -26,5 +26,13 @@ BookInstanceSchema
     formatted_date+= DateTime.fromJSDate(this.due_back).toLocaleString(DateTime.DATE_MED);
     return formatted_date
   })
+//Format Date to YYYY-MM-DD
+BookInstanceSchema
+  .virtual('due_back_for_forms')
+  .get(function(){
+    let formatted_date = '';
+    formatted_date+= this.due_back.toISOString().split('T')[0];
+    return formatted_date
+  })
 //Export model
 module.exports = mongoose.model('BookInstance', BookInstanceSchema);

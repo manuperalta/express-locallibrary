@@ -57,5 +57,19 @@ AuthorSchema
     this.date_of_death ? lifetime_string += DateTime.fromJSDate(this.date_of_death).toLocaleString(DateTime.DATE_MED) : '';
     return lifetime_string;
   })
+AuthorSchema
+  .virtual('date_of_birth_for_forms')
+  .get(function(){
+    let formatted_date = '';
+    formatted_date+= this.date_of_birth.toISOString().split('T')[0];
+    return formatted_date
+  })
+AuthorSchema
+  .virtual('date_of_death_for_forms')
+  .get(function(){
+    let formatted_date = '';
+    formatted_date+= this.date_of_death.toISOString().split('T')[0];
+    return formatted_date
+  })
 //Export model
 module.exports = mongoose.model('Author', AuthorSchema);

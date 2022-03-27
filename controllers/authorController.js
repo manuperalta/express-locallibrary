@@ -120,8 +120,8 @@ exports.author_delete_post = function (req, res, next) {
         }
         else {
             //Author has no books. Delete object and redirect to the list of authors.
-            Author.findByIdAndRemove(req.body.authorid, function deleteAuthor(err){
-                if(err) { return next(err); }
+            Author.findByIdAndRemove(req.body.authorid, function deleteAuthor(err) {
+                if (err) { return next(err); }
                 //Success.
                 //Go to Author list:
                 res.redirect('/catalog/authors')
@@ -132,13 +132,55 @@ exports.author_delete_post = function (req, res, next) {
 
 
 //Display Author update form on GET
-exports.author_update_get = (req, res) => {
-    res.send('NOT IMPLEMENTED: Author update GET');
+exports.author_update_get = (req, res, next) => {
+    Author.findById(req.params.id, function (err, author) {
+        if (err) { return next(err) }
+        if (author == null) {//Author does not exist in the database
+            var err = new Error('Author not found');
+            err.status = 404;
+            return next(err);
+        }
+        //Success.
+        //Render author in form
+        res.render('author_form', { title: 'Update Author', author: author })
+    })
 };
 
 //Handle Author update on POST
-exports.author_update_post = (req, res) => {
-    res.send('NOT IMPLEMENTED: Author update POST')
-}
+exports.author_update_post = [
+    body('first_name').trim().isLength({ min: 1 }).escape().withMessage('Name must be specified')
+        .isAlphanumeric().withMessage('First name has non-alphanumeric characters'),
+    body('family_name').trim().isLength({ min: 1 }).escape().withMessage('Family name must be specified.')
+        .isAlphanumeric().withMessage('Family name has non-alphanumeric characters.'),
+    body('date_of_birth', 'Invalid date of birth').optional({ checkFalsy: true }).isISO8601().toDate(),
+    body('date_of_death', 'Invalid date of death').optional({ checkFalsy: true }).isISO8601().toDate(),
+    //Process request after validation and sanitization
+    (req, res, next) => {
+        //Extract the validation errors from a request
+        const errors = validationResult(req)
+
+        if (!errors.isEmpty()) {
+            //There are errors. Render form again with sanitized values and error messages
+            res.render('author_form', { title: 'Create Author', author: req.body, errors: errors.array });
+            return;
+        }
+        else {
+            //Data from form is valid.
+            //Create an Author object with escaped and trimmed data.
+            let author = new Author({
+                first_name: req.body.first_name,
+                family_name: req.body.family_name,
+                date_of_birth: req.body.date_of_birth,
+                date_of_death: req.body.date_of_death,
+                _id: req.params.id
+            });
+            Author.findByIdAndUpdate(req.params.id, author, function (err, theauthor) {
+                if (err) { return next(err); }
+                //Successful; redirect to new author record.
+                res.redirect(theauthor.url)
+            })
+        }
+    }
+]
 
 

@@ -4,7 +4,8 @@ var app = express();
 //Node modules
 var createError = require('http-errors');
 var path = require('path');
-
+var compression = require('compression');
+var helmet = require('helmet');
 //Express modules
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
@@ -12,7 +13,7 @@ var logger = require('morgan');
 //Routers
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-var catalogRouter = require('./routes/catalog');
+var catalogRouter = require('./routes/catalog'); //Import routes for "catalog" area of site
 
 //Connecting to Database
 var mongoose = require('mongoose')
@@ -21,41 +22,11 @@ mongoose.connect(mongoDB, { useNewURLParser: true, useUnifiedTopology: true });
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error'));
 
-var Book = require('./models/book.js')
-var Author = require('./models/author.js')
-var BookInstance = require('./models/bookinstance.js')
-let bobSmith = new Author({
-  firstName: 'Bob',
-  familyName: 'Smith'
-})
-let someBook = new Book({
-  title: 'hello',
-  author: bobSmith._id,
-  yearWritten: '1993'
-})
-let saveAuthor = (newAuthor) => {
-  newAuthor.save((err, success) => {
-    if (err) console.log(err);
-    else console.log(success);
-  })
-}
-let saveBook = (newBook) => {
-  newBook.save((err, success) => {
-    if (err) console.log(err);
-    else console.log(success)
-  })
-}
-// saveAuthor(bobSmith);
-// saveBook(someBook);
-Book
-  .findOne({ title: 'hello' })
-  .populate('author')
-  .exec((err, success) => { if (err) return err; else console.log('Successful! ' + success) })
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
-
+app.use(compression()) //Compress all routes
+app.use(helmet());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

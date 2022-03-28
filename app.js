@@ -16,8 +16,9 @@ var usersRouter = require('./routes/users');
 var catalogRouter = require('./routes/catalog'); //Import routes for "catalog" area of site
 
 //Connecting to Database
-var mongoose = require('mongoose')
-var mongoDB = 'mongodb+srv://m001-student:m001-mongodb-basics@sandbox.xw2vj.mongodb.net/library_project?retryWrites=true&w=majority'
+var mongoose = require('mongoose');
+var dev_db_url = 'mongodb+srv://m001-student:m001-mongodb-basics@sandbox.xw2vj.mongodb.net/library_project?retryWrites=true&w=majority';
+var mongoDB = process.env.MONGODB_URI || dev_db_url;
 mongoose.connect(mongoDB, { useNewURLParser: true, useUnifiedTopology: true });
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error'));

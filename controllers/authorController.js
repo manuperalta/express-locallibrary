@@ -44,9 +44,9 @@ exports.author_create_get = (req, res, next) => {
 //Handle Author create on POST
 exports.author_create_post = [
     body('first_name').trim().isLength({ min: 1 }).escape().withMessage('Name must be specified')
-        .isAlphanumeric().withMessage('First name has non-alphanumeric characters'),
+        .isAlphanumeric('en-US',{ignore:' '}).withMessage('First name has non-alphanumeric characters'),
     body('family_name').trim().isLength({ min: 1 }).escape().withMessage('Family name must be specified.')
-        .isAlphanumeric().withMessage('Family name has non-alphanumeric characters.'),
+        .isAlphanumeric('en-US',{ignore:' '}).withMessage('Family name has non-alphanumeric characters.'),
     body('date_of_birth', 'Invalid date of birth').optional({ checkFalsy: true }).isISO8601().toDate(),
     body('date_of_death', 'Invalid date of death').optional({ checkFalsy: true }).isISO8601().toDate(),
 
@@ -57,7 +57,7 @@ exports.author_create_post = [
 
         if (!errors.isEmpty()) {
             //There are errors. Render form again with sanitized values and error messages
-            res.render('author_form', { title: 'Create Author', author: req.body, errors: errors.array });
+            res.render('author_form', { title: 'Create Author', author: req.body, errors: errors.array() });
             return;
         }
         else {
